@@ -1,11 +1,10 @@
 package xyz.terminalnode.mrfreeze.settings_api.model
 
-import java.sql.Timestamp
 import javax.persistence.*
 
 @Entity
-@Table(name = "mutes")
-data class Mute(
+@Table(name = "mute_entries")
+data class MuteEntry(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -21,5 +20,5 @@ data class Mute(
     val isVoluntary: Boolean = false,
 
     @Column(name = "muted_until", nullable = true)
-    val mutedUntil: Timestamp? = null
+    val mutedUntil: Long? = null
 )
