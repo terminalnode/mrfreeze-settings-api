@@ -14,7 +14,7 @@ class MuteEntryControllerV1(
   
   @PostMapping
   fun create(@RequestBody muteEntry: MuteEntry): MuteEntry {
-    // TODO set id to 0 to avoid overwriting
+    muteEntry.id = 0
     return muteEntryRepository.save(muteEntry)
   }
 
@@ -30,8 +30,11 @@ class MuteEntryControllerV1(
   
   @PutMapping
   fun update(@RequestBody muteEntry: MuteEntry): MuteEntry {
-    val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(muteEntry.id);
-    
+    val id: Long = muteEntry.id
+        ?: throw java.lang.IllegalArgumentException("A mute entry ID is required.")
+
+    val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(id);
+
     if (dbEntry.isPresent) return muteEntryRepository.save(muteEntry)
     throw IllegalArgumentException("No mute entry with that ID exists.")
   }

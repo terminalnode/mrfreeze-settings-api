@@ -4,21 +4,35 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "mute_entries")
-data class MuteEntry(
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    val id: Long = 0,
+open class MuteEntry {
+  @get:Id
+  @get:Column(name = "id")
+  @get:GeneratedValue(strategy = GenerationType.SEQUENCE)
+  open var id: Long? = 0
 
-    @Column(name = "server_id", nullable = false)
-    val serverId: String,
+  @get:Column(name = "server_id", nullable = false)
+  open var serverId: String? = ""
 
-    @Column(name = "user_id", nullable = false)
-    val userId: String,
+  @get:Column(name = "user_id", nullable = false)
+  open var userId: String? = ""
 
-    @Column(name = "is_voluntary", nullable = false)
-    val isVoluntary: Boolean = false,
+  @get:Column(name = "is_voluntary", nullable = false)
+  open var isVoluntary: Boolean? = false
 
-    @Column(name = "muted_until", nullable = true)
-    val mutedUntil: Long? = null
-)
+  @get:Column(name = "muted_until", nullable = true)
+  open var mutedUntil: Long? = null
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || javaClass != other.javaClass) return false
+    
+    val that = other as MuteEntry
+    if (id != that.id) return false
+    return true
+  }
+
+  override fun hashCode(): Int {
+    if (id != null) return id.hashCode()
+    return 0
+  }
+}
