@@ -3,7 +3,12 @@ package xyz.terminalnode.mrfreeze.settings_api.model
 import javax.persistence.*
 
 @Entity
-@Table(name = "mute_entries")
+@Table(
+    name = "mute_entries",
+    uniqueConstraints= [
+      UniqueConstraint(columnNames = [ "server_id" , "user_id" ])
+    ]
+)
 open class MuteEntry {
   @get:Id
   @get:Column(name = "id")
