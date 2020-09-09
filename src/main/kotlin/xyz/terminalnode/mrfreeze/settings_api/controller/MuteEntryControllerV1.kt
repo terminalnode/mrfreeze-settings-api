@@ -25,17 +25,33 @@ class MuteEntryControllerV1(
 
   @GetMapping("/id/{id}")
   fun getById(@PathVariable id: Long): MuteEntry? {
-    return muteEntryRepository.findByIdOrNull(id)
+    val entry = muteEntryRepository.findById(id)
+    
+    if (entry.isPresent) {
+      return entry.get()
+    }
+    throw IllegalArgumentException("No mute entry with that ID exists.")
   }
   
+  @GetMapping("/uid/{userId}")
+  fun getByUserId(@PathVariable userId: String): List<MuteEntry> {
+    return muteEntryRepository.findAllByUserId(userId)
+  }
+
+  @GetMapping("/sid/{serverId}")
+  fun getByServerId(@PathVariable serverId: String): List<MuteEntry> {
+    return muteEntryRepository.findAllByServerId(serverId)
+  }
+
   @PutMapping
   fun update(@RequestBody muteEntry: MuteEntry): MuteEntry {
     val id: Long = muteEntry.id
         ?: throw java.lang.IllegalArgumentException("A mute entry ID is required.")
-
     val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(id);
 
-    if (dbEntry.isPresent) return muteEntryRepository.save(muteEntry)
+    if (dbEntry.isPresent) {
+      return muteEntryRepository.save(muteEntry)
+    }
     throw IllegalArgumentException("No mute entry with that ID exists.")
   }
   
