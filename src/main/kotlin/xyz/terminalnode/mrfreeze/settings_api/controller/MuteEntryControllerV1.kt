@@ -1,6 +1,5 @@
 package xyz.terminalnode.mrfreeze.settings_api.controller
 
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.web.bind.annotation.*
 import xyz.terminalnode.mrfreeze.settings_api.model.MuteEntry
 import xyz.terminalnode.mrfreeze.settings_api.repository.MuteEntryRepository
