@@ -1,24 +1,20 @@
 package xyz.terminalnode.mrfreeze.settings_api.model
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped
 import javax.persistence.*
 
 @Entity
 @Table(
     name = "mute_entries",
-    uniqueConstraints = [ UniqueConstraint(columnNames = [ "server_id" , "user_id" ]) ],
-    indexes = [ Index(name = "MUTE_ENTRY_IDX_1", columnList = "muted_until") ]
+    indexes = [
+      Index(name = "MUTE_ENTRY_IDX_1", columnList = "muted_until"),
+      Index(name = "MUTE_ENTRY_IDX_2", columnList = "is_voluntary")
+    ]
 )
 open class MuteEntry {
-  @get:Id
-  @get:Column(name = "id")
-  @get:GeneratedValue(strategy = GenerationType.SEQUENCE)
-  open var id: Long? = 0
-
-  @get:Column(name = "server_id", nullable = false)
-  open var serverId: String? = ""
-
-  @get:Column(name = "user_id", nullable = false)
-  open var userId: String? = ""
+  @get:EmbeddedId
+  @get:JsonUnwrapped
+  open var userServerKey: UserServerKey? = null
 
   @get:Column(name = "is_voluntary", nullable = false)
   open var isVoluntary: Boolean? = false
@@ -32,14 +28,13 @@ open class MuteEntry {
     if (other == null || javaClass != other.javaClass) return false
     
     val that = other as MuteEntry
-    if (id != that.id) return false
+    if (userServerKey != that.userServerKey) return false
     return true
   }
 
 
   override fun hashCode(): Int {
-    if (id != null) return id.hashCode()
-    return 0
+    return userServerKey.hashCode()
   }
 }
 

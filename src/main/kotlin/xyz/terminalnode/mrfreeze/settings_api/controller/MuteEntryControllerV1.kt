@@ -2,8 +2,8 @@ package xyz.terminalnode.mrfreeze.settings_api.controller
 
 import org.springframework.web.bind.annotation.*
 import xyz.terminalnode.mrfreeze.settings_api.model.MuteEntry
+import xyz.terminalnode.mrfreeze.settings_api.model.UserServerKey
 import xyz.terminalnode.mrfreeze.settings_api.repository.MuteEntryRepository
-import java.util.Optional
 
 @RestController
 @RequestMapping("/api/v1/mute_entries")
@@ -11,9 +11,40 @@ class MuteEntryControllerV1(
     private val muteEntryRepository: MuteEntryRepository
 ) {
   
+  fun getByUserServerKey(serverId: String, userId: String): MuteEntry {
+    val key = UserServerKey()
+    key.userId = userId
+    key.serverId = serverId
+    val muteEntry = muteEntryRepository.findById(key)
+
+    if (muteEntry.isEmpty) {
+      throw IllegalArgumentException("No mute entry with that ID exists.")
+    }
+    return muteEntry.get()
+  }
+  
+  fun deleteByUserServerKey(serverId: String, userId: String): MuteEntry {
+    val muteEntry = getByUserServerKey(serverId, userId)
+    muteEntryRepository.delete(muteEntry)
+    return muteEntry
+  }
+  
+  fun getEntryOrNull(muteEntry: MuteEntry): MuteEntry? {
+    val key: UserServerKey = muteEntry.userServerKey
+        ?: throw IllegalArgumentException("Missing user and/or server.")
+
+    if (key.serverId == null || key.userId == null) {
+      throw IllegalArgumentException("Missing user and/or server.")
+    }
+
+    val dbEntry = muteEntryRepository.findById(key)
+    if (dbEntry.isPresent) return dbEntry.get()
+    return null
+  }
+  
   @PostMapping
   fun create(@RequestBody muteEntry: MuteEntry): MuteEntry {
-    muteEntry.id = 0
+    getEntryOrNull(muteEntry)
     return muteEntryRepository.save(muteEntry)
   }
 
@@ -22,26 +53,26 @@ class MuteEntryControllerV1(
     return muteEntryRepository.findAll()
   }
 
-  @GetMapping("/id/{id}")
-  fun getById(@PathVariable id: Long): MuteEntry? {
-    val entry = muteEntryRepository.findById(id)
-    
-    if (entry.isPresent) {
-      return entry.get()
-    }
-    throw IllegalArgumentException("No mute entry with that ID exists.")
+  @GetMapping("/server/{sid}/user/{uid}")
+  fun getBySidUid(@PathVariable sid: String, @PathVariable uid: String): MuteEntry {
+    return getByUserServerKey(sid, uid)
   }
-  
+
+  @GetMapping("/user/{uid}/server/{sid}")
+  fun getByUidSid(@PathVariable sid: String, @PathVariable uid: String): MuteEntry {
+    return getByUserServerKey(sid, uid)
+  }
+
   @GetMapping("/uid/{userId}")
   fun getByUserId(@PathVariable userId: String): List<MuteEntry> {
-    return muteEntryRepository.findAllByUserId(userId)
+    return muteEntryRepository.findAllByUserServerKeyUserId(userId)
   }
 
   @GetMapping("/sid/{serverId}")
   fun getByServerId(@PathVariable serverId: String): List<MuteEntry> {
-    return muteEntryRepository.findAllByServerId(serverId)
+    return muteEntryRepository.findAllByUserServerKeyServerId(serverId)
   }
-  
+
   @GetMapping("/due/now")
   fun getMuteEntriesThatAreDue(): List<MuteEntry> {
     return muteEntryRepository.findAllByMutedUntilLessThan(System.currentTimeMillis() / 1000)
@@ -54,24 +85,20 @@ class MuteEntryControllerV1(
 
   @PutMapping
   fun update(@RequestBody muteEntry: MuteEntry): MuteEntry {
-    val id: Long = muteEntry.id
-        ?: throw IllegalArgumentException("A mute entry ID is required.")
-    val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(id);
-
-    if (dbEntry.isPresent) {
-      return muteEntryRepository.save(muteEntry)
+    if (getEntryOrNull(muteEntry) == null) {
+      throw IllegalArgumentException("No mute entry with that server and user exists.")
     }
-    throw IllegalArgumentException("No mute entry with that ID exists.")
+
+    return muteEntryRepository.save(muteEntry)
   }
   
-  @DeleteMapping("/id/{id}")
-  fun deleteById(@PathVariable id: Long): MuteEntry {
-    val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(id);
+  @DeleteMapping("/server/{sid}/user/{uid}")
+  fun deleteBySidUid(@PathVariable sid: String, @PathVariable uid: String): MuteEntry {
+    return deleteByUserServerKey(sid, uid)
+  }
 
-    if (dbEntry.isPresent) {
-      muteEntryRepository.delete(dbEntry.get())
-      return dbEntry.get()
-    }
-    throw IllegalArgumentException("No mute entry with that ID exists.")
+  @DeleteMapping("/user/{uid}/server/{sid}")
+  fun deleteByUidSid(@PathVariable sid: String, @PathVariable uid: String): MuteEntry {
+    return deleteByUserServerKey(sid, uid)
   }
 }
