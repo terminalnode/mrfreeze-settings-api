@@ -4,7 +4,18 @@ bot [MrFreeze](https://github.com/terminalnode/mrfreeze). Currently the bot does
 of authentication and as such is meant to run only as a local server accessible to a bot running
 locally.
 
-## Uhm... why?
+## Running the application
+To run the application you only need a functional Postgres server with a database called
+`mrfreeze_settings` and a user with the name and password `mrfreeze`. Then you just run the app
+with `gradle bootRun`. If you don't have Gradle installed it also comes with gradle wrapper
+scripts, `gradlew` for reasonable operating systems and `gradlew.bat` for Windows.
+
+If you want to change the database name, user or password used these values are set in
+`src/main/resources/application.properties`. You can also change which database it's using, but
+if you intend to contribute to the projects you have to test your changes against a postgres
+database to make sure it's working properly.
+
+## Why does this need to exist?
 The primary reason for anything that has to do with MrFreeze is that it's fun, and that goes for
 this as well. It's a fine excuse for writing a springboot project in Kotlin and that's as good a
 reason as any.
@@ -21,7 +32,19 @@ stored in the bot. I'm somewhat familiar and comfortable with JPA/Hibernate, but
 comfortable with SQL Alchemy or the other Python ORM libraries. So a "microservice" seems like a
 good idea... maybe?
 
-## Test API
-As of yet there's no publically available version of this API for development, since it's not
-ready for use in the bot yet anyway. At some point I plan to throw it up on Heroku or something
-though so developers of the bot won't have to run their own instance of it.
+## Development/Testing/Staging API on Heroku
+As mentioned the API is currently meant to run locally on the same machine as the bot, because
+there is no authentication enabled yet. Running it on a public server would give anyone access to
+do anything they want - not good. However, because the API (once the bot starts using it) is
+enabled it will be required for developing the bot.
+
+With this is mind I've set it up for automatic deployments on every push
+[on Heroku](https://mrfreeze-settings-api.herokuapp.com/), meaning that a version of the API
+should always be available on this URL. It's a free heroku account and will thus go to sleep
+every now and then. To ensure that it's awake you can visit the
+[testing site](https://mrfreeze-settings-api.herokuapp.com/test) in your browser, which should
+present you with a simple web page.
+
+Waking the server up isn't always necessary, ideally the bot should be built in such a way that it
+has strategies for handling an unresponsive API as well, but it makes things a bit more predictable
+and allows you to verify that it is working.
