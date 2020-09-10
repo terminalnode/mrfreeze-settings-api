@@ -3,7 +3,7 @@ package xyz.terminalnode.mrfreeze.settings_api.controller
 import org.springframework.web.bind.annotation.*
 import xyz.terminalnode.mrfreeze.settings_api.model.MuteEntry
 import xyz.terminalnode.mrfreeze.settings_api.repository.MuteEntryRepository
-import java.util.*
+import java.util.Optional
 
 @RestController
 @RequestMapping("/api/v1/mute_entries")
@@ -41,11 +41,21 @@ class MuteEntryControllerV1(
   fun getByServerId(@PathVariable serverId: String): List<MuteEntry> {
     return muteEntryRepository.findAllByServerId(serverId)
   }
+  
+  @GetMapping("/due/now")
+  fun getMuteEntriesThatAreDue(): List<MuteEntry> {
+    return muteEntryRepository.findAllByMutedUntilLessThan(System.currentTimeMillis() / 1000)
+  }
+
+  @GetMapping("/due/never")
+  fun getMuteEntriesThatAreNeverDue(): List<MuteEntry> {
+    return muteEntryRepository.findAllByMutedUntilIsNull()
+  }
 
   @PutMapping
   fun update(@RequestBody muteEntry: MuteEntry): MuteEntry {
     val id: Long = muteEntry.id
-        ?: throw java.lang.IllegalArgumentException("A mute entry ID is required.")
+        ?: throw IllegalArgumentException("A mute entry ID is required.")
     val dbEntry: Optional<MuteEntry> = muteEntryRepository.findById(id);
 
     if (dbEntry.isPresent) {

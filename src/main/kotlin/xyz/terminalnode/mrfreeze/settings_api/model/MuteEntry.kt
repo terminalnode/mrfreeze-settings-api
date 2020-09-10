@@ -5,9 +5,8 @@ import javax.persistence.*
 @Entity
 @Table(
     name = "mute_entries",
-    uniqueConstraints= [
-      UniqueConstraint(columnNames = [ "server_id" , "user_id" ])
-    ]
+    uniqueConstraints = [ UniqueConstraint(columnNames = [ "server_id" , "user_id" ]) ],
+    indexes = [ Index(name = "MUTE_ENTRY_IDX_1", columnList = "muted_until") ]
 )
 open class MuteEntry {
   @get:Id
@@ -27,6 +26,7 @@ open class MuteEntry {
   @get:Column(name = "muted_until", nullable = true)
   open var mutedUntil: Long? = null
 
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || javaClass != other.javaClass) return false
@@ -36,8 +36,10 @@ open class MuteEntry {
     return true
   }
 
+
   override fun hashCode(): Int {
     if (id != null) return id.hashCode()
     return 0
   }
 }
+

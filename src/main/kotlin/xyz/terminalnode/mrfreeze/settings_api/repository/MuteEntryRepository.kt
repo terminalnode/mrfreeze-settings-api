@@ -6,4 +6,6 @@ import xyz.terminalnode.mrfreeze.settings_api.model.MuteEntry
 interface MuteEntryRepository : JpaRepository<MuteEntry, Long> {
   fun findAllByUserId(userId: String): List<MuteEntry>
   fun findAllByServerId(serverId: String): List<MuteEntry>
+  fun findAllByMutedUntilLessThan(unixTime: Long): List<MuteEntry>
+  fun findAllByMutedUntilIsNull(): List<MuteEntry>
 }
